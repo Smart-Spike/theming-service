@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  theming-service:
+    image: smartspike/theming-service
+    ports:
+      - "9000:9000"
