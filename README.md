@@ -1,16 +1,19 @@
 # Theming Service
 
-To run using sbt: 
+## Run
+Using sbt: 
 ```
 sbt run
 ```
 
-To run latest published image in Docker:
+Run latest published image in Docker:
 ```
 docker-compose up -d
 ```
 
-To publish new latest Docker image:
+Verify if service is up by going to http://localhost:9000/api/healthcheck
+
+## Publish to Docker Hub 
 1. make sure docker client is logged in to docker hub
     ```
     docker login
