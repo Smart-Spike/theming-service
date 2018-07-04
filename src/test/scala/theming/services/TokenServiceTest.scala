@@ -1,10 +1,9 @@
 package theming.services
 
+import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import theming.domain.User
-
-import scala.util.{Failure, Success}
 
 class TokenServiceTest extends FunSpec with Matchers {
 
@@ -20,26 +19,26 @@ class TokenServiceTest extends FunSpec with Matchers {
 
         val rawToken = tokenService.createToken(testUser.copy(id = Some(expectedUserId)))
 
-        Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256)) match {
-          case Success(decodedToken: String) =>
-            decodedToken should include (expectedUserId)
-          case Failure(e) =>
-            fail(e.getMessage)
+        for {
+          decoded <- Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256))
+          json <- parse(decoded)
+          userId <- json.hcursor.get[String]("userId")
+        } {
+          userId shouldBe expectedUserId
         }
       }
 
-      it("should create token with roles") {
+      it("should create token with rolesasd") {
         val expectedRoles = Seq("ADMIN", "USER")
 
         val rawToken = tokenService.createToken(testUser.copy(roles = expectedRoles))
 
-        Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256)) match {
-          case Success(decodedToken: String) =>
-            expectedRoles.foreach { role =>
-              decodedToken should include (role)
-            }
-          case Failure(e) =>
-            fail(e.getMessage)
+        for {
+          decoded <- Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256))
+          json <- parse(decoded)
+          roles <- json.hcursor.get[Seq[String]]("roles")
+        } {
+          roles should contain only (expectedRoles: _*)
         }
       }
     }
