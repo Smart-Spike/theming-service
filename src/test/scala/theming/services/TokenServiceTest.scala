@@ -2,7 +2,7 @@ package theming.services
 
 import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
-import pdi.jwt.{Jwt, JwtAlgorithm}
+import pdi.jwt.{Jwt, JwtOptions}
 import theming.domain.User
 
 class TokenServiceTest extends FunSpec with Matchers {
@@ -20,7 +20,7 @@ class TokenServiceTest extends FunSpec with Matchers {
         val rawToken = tokenService.createToken(testUser.copy(id = Some(expectedUserId)))
 
         for {
-          decoded <- Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256))
+          decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
           json <- parse(decoded)
           userId <- json.hcursor.get[String]("userId")
         } {
@@ -34,7 +34,7 @@ class TokenServiceTest extends FunSpec with Matchers {
         val rawToken = tokenService.createToken(testUser.copy(roles = expectedRoles))
 
         for {
-          decoded <- Jwt.decode(rawToken, "mySuperSecretKey", Seq(JwtAlgorithm.HS256))
+          decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
           json <- parse(decoded)
           roles <- json.hcursor.get[Seq[String]]("roles")
         } {
