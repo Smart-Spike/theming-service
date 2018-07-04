@@ -28,7 +28,7 @@ class TokenServiceTest extends FunSpec with Matchers {
         }
       }
 
-      it("should create token with rolesasd") {
+      it("should create token with roles") {
         val expectedRoles = Seq("ADMIN", "USER")
 
         val rawToken = tokenService.createToken(testUser.copy(roles = expectedRoles))
@@ -39,6 +39,20 @@ class TokenServiceTest extends FunSpec with Matchers {
           roles <- json.hcursor.get[Seq[String]]("roles")
         } {
           roles should contain only (expectedRoles: _*)
+        }
+      }
+
+      it("should create token issued at and expiry") {
+        val rawToken = tokenService.createToken(testUser)
+
+        for {
+          decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
+          json <- parse(decoded)
+          issuedAt <- json.hcursor.get[Long]("iat")
+          expires <- json.hcursor.get[Long]("exp")
+        } {
+          issuedAt should not be 0
+          (expires - issuedAt) should be (60 * 10)
         }
       }
     }
