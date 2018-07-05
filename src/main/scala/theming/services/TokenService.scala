@@ -28,21 +28,17 @@ class TokenService {
   }
 
   def verifyAndExtractAuth(token: String): Option[Auth] = {
-    // TODO: find a better way to chain/flatten Try -> Either -> Result
-    val decoded = Jwt.decode(token, tempKey, Seq(JwtAlgorithm.HS256)) match {
-      case Success(decodedToken) => Some(decodedToken)
+    Jwt.decode(token, tempKey, Seq(JwtAlgorithm.HS256)) match {
+      case Success(claimAsString) =>
+        decode[Auth](claimAsString) match {
+          case Right(auth) => Option(auth)
+          case Left(error) =>
+            logger.info(s"error decoding parsing JWT claim JSON $error")
+            None
+        }
       case Failure(e) =>
-        logger.info("unable to decode token", e.getMessage)
+        logger.info(s"unable to decode token ${e.getMessage}")
         None
-    }
-    decoded.map { decodedToken =>
-      parse(decodedToken) match {
-        case Right(json) => json
-      }
-    }.map { json =>
-      json.as[Auth] match {
-        case Right(auth) => auth
-      }
     }
   }
 }
