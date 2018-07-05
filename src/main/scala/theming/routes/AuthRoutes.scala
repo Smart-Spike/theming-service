@@ -1,9 +1,10 @@
 package theming.routes
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import akka.http.scaladsl.marshalling.Marshaller._
 import theming.domain.Credentials
 import theming.services.{TokenService, UserService}
 
