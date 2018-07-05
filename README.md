@@ -22,3 +22,29 @@ Verify if service is up by going to http://localhost:9000/api/healthcheck
     ```
     sbt docker:publish
     ```
+    
+## Usage example
+```http request
+POST http://localhost:9000/api/login
+Content-Type: application/json
+
+{
+    "email": "admin@feature-service.com",
+    "password": "password123"
+}
+
+# Response: token 
+```
+
+```http request
+GET http://localhost:9000/api/users/user-id/theme
+Authorization: Bearer {token from login}
+
+# Response: 
+# {
+#   "theme": "DARK",
+#   "config": {
+#     "font": "large"
+#   }
+# }
+```
