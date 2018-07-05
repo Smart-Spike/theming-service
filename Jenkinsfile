@@ -4,12 +4,12 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh sbt test
+                sh 'sbt test'
             }
         }
         stage('Deploy') {
             steps {
-                sh sbt docker:deploy
+                sh 'sbt docker:deploy'
             }
         }
     }
