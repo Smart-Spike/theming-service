@@ -18,7 +18,10 @@ libraryDependencies ++= Seq(
   "com.pauldijou" %% "jwt-core" % "0.16.0",
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
+  "org.liquibase" % "liquibase-core" % "3.0.5",
+  "com.h2database" % "h2" % "1.4.197" % Test,
+  "mysql" % "mysql-connector-java" % "8.0.11"
 )
 
 enablePlugins(JavaAppPackaging)

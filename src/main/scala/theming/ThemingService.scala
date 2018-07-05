@@ -5,7 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import theming.config.ApplicationConfig
+import theming.config.{ApplicationConfig, SchemaMigration}
 import theming.routes.{AuthRoutes, ThemeRoutes}
 import theming.security.AuthenticationDirective
 import theming.services.{TokenService, UserService}
@@ -40,6 +40,8 @@ object Main extends App with ThemingService with ApplicationConfig {
   override implicit val system: ActorSystem = ActorSystem()
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val executor: ExecutionContext = system.dispatcher
+
+  new SchemaMigration(databaseConfig).run()
 
   Http().bindAndHandle(routes, httpHost, httpPort)
 }

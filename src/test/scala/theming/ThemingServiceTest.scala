@@ -6,6 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import org.scalatest._
+import theming.config.{ApplicationConfig, SchemaMigration}
 import theming.domain.{Credentials, Theme}
 import theming.services.TokenService
 
@@ -16,9 +17,15 @@ class ThemingServiceTest extends AsyncFunSpec
   with Fixtures
   with ScalatestRouteTest
   with Matchers
-  with FailFastCirceSupport {
+  with FailFastCirceSupport
+  with BeforeAndAfterAll
+  with ApplicationConfig {
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
+
+  override def beforeAll: Unit = {
+    new SchemaMigration(databaseConfig).run()
+  }
 
   describe("Theming service") {
 
