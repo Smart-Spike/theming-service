@@ -1,6 +1,6 @@
 package theming
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ContentTypes, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
@@ -48,6 +48,7 @@ class ThemingServiceTest extends AsyncFunSpec
       it("returns Token for correct credentials") {
         Post("/api/login", Credentials("admin@feature-service.com", "password123")) ~> routes ~> check {
           status shouldBe StatusCodes.OK
+          contentType shouldBe ContentTypes.`text/plain(UTF-8)`
           responseAs[String] should not be empty
         }
       }

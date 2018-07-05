@@ -4,6 +4,7 @@ import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
 import pdi.jwt.{Jwt, JwtOptions}
 import theming.Fixtures
+import theming.domain.Auth
 
 class TokenServiceTest extends FunSpec with Matchers with Fixtures {
 
@@ -20,9 +21,9 @@ class TokenServiceTest extends FunSpec with Matchers with Fixtures {
         for {
           decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
           json <- parse(decoded)
-          userId <- json.hcursor.get[String]("userId")
+          auth <- json.as[Auth]
         } {
-          userId shouldBe expectedUserId
+          auth.userId shouldBe expectedUserId
         }
       }
 
@@ -34,9 +35,9 @@ class TokenServiceTest extends FunSpec with Matchers with Fixtures {
         for {
           decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
           json <- parse(decoded)
-          roles <- json.hcursor.get[Seq[String]]("roles")
+          auth <- json.as[Auth]
         } {
-          roles should contain only (expectedRoles: _*)
+          auth.roles should contain only (expectedRoles: _*)
         }
       }
 

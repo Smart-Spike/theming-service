@@ -5,17 +5,18 @@ import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.server.Route
 import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import theming.domain.{Auth, Theme}
+import theming.domain.Theme
+import theming.security.AuthenticationDirective.AuthenticationDirective
 
 import scala.concurrent.ExecutionContext
 
-class ThemeRoutes(authenticator: AsyncAuthenticator[Auth])(implicit executionContext: ExecutionContext) extends FailFastCirceSupport {
+class ThemeRoutes(authenticate: AuthenticationDirective)(implicit executionContext: ExecutionContext) extends FailFastCirceSupport {
 
   val logger = Logger(getClass)
 
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>
-      authenticateOAuth2Async("my-realm", authenticator) { auth =>
+      authenticate { auth =>
         authorize(auth.isAdmin || (auth.isUser && userId == auth.userId)) {
           get {
             logger.info(s"Auth context: $auth")
