@@ -9,7 +9,9 @@ sbt run
 
 Run latest published image in Docker:
 ```
-docker-compose up -d
+docker-compose up -d mysql 
+# wait for db to initialize (a few seconds ususally)
+docker-compose up -d theming-service
 ```
 
 Verify if service is up by going to http://localhost:9000/api/healthcheck

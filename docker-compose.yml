@@ -5,6 +5,8 @@ services:
     image: smartspike/theming-service
     ports:
       - "9000:9000"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/themingdb?allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false
   mysql:
     image: mysql:8
     ports:
