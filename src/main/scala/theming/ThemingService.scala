@@ -3,10 +3,12 @@ package theming
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 import theming.config.ApplicationConfig
-import theming.routes.AuthRoutes
+import theming.domain.Auth
+import theming.routes.{AuthRoutes, ThemeRoutes}
+import theming.security.Authenticator
 import theming.services.{TokenService, UserService}
 
 import scala.concurrent.ExecutionContext
@@ -19,6 +21,8 @@ trait ThemingService {
   private val userService = new UserService()
   private val tokenService = new TokenService()
   private val authRoutes = new AuthRoutes(userService, tokenService).routes
+  private val authenticator: Directives.AsyncAuthenticator[Auth] = Authenticator.tokenAuthenticator(tokenService)
+  private val themeRoutes = new ThemeRoutes(authenticator).routes
 
   private val healthCheckRoute = pathPrefix("healthcheck") {
     get {
@@ -29,7 +33,8 @@ trait ThemingService {
   val routes: Route =
     pathPrefix("api") {
       healthCheckRoute ~
-        authRoutes
+        authRoutes ~
+        themeRoutes
     }
 }
 

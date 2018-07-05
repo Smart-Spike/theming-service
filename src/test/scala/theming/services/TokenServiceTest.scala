@@ -3,13 +3,11 @@ package theming.services
 import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
 import pdi.jwt.{Jwt, JwtOptions}
-import theming.domain.User
+import theming.Fixtures
 
-class TokenServiceTest extends FunSpec with Matchers {
+class TokenServiceTest extends FunSpec with Matchers with Fixtures {
 
   val tokenService = new TokenService
-
-  val testUser = User(Some("user-id"), "me@email.com", "password", Seq("USER"))
 
   describe("TokenService") {
 
@@ -52,8 +50,25 @@ class TokenServiceTest extends FunSpec with Matchers {
           expires <- json.hcursor.get[Long]("exp")
         } {
           issuedAt should not be 0
-          (expires - issuedAt) should be (60 * 10)
+          (expires - issuedAt) should be(60 * 10)
         }
+      }
+    }
+
+    describe("verify and extract Auth") {
+      it("returns Auth for valid token") {
+        val token = tokenService.createToken(testUser)
+
+        val result = tokenService.verifyAndExtractAuth(token)
+
+        result shouldBe defined
+        result.get.userId shouldBe testUser.id.get
+      }
+
+      it("returns none for in valid token") {
+        val result = tokenService.verifyAndExtractAuth("asdf")
+
+        result should not be defined
       }
     }
 
