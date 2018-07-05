@@ -3,8 +3,14 @@ language: scala
 scala:
   - 2.12.1
 
+env:
+  global:
+    - DOCKER_USER=chekalin
+    - secure: a8zZL2Ac6f2O0ieO3EnozwlEpZ94csIX85DvN/++EVF4elJAV5CLlBbyaTn8MUZGfQ0QRyZljYQ5UU7M8V++OoZOi8yCh+bvsQpP9Ar6Fhliw4112BEI5X3Xx1w2nPtcUb/C2cDXF47zNGUEIpmLZc/kNJOiGi3jPzRBgjkRWVlfeUloWn8jiDkjWlBsE5K1AkTt1VqJXMNnr/SNlScg+8narQJ9MwjovuFLIq/6awrPoVq6qYSzOGE8RWQHu8+PFr7/TSSb/qtai+EzGnUsHXtExEdfx8v/RQoMDUan6PVKRz0dX13WYbtMJpL+LCRkm0LK/IgGrR++mpBpLbvmTw==
+
 build:
   ci:
     - sbt compile
     - sbt test
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
     - sbt docker:publish
