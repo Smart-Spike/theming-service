@@ -1,4 +1,5 @@
 # Theming Service
+[![Run Status](https://api.shippable.com/projects/5b3e2755fbb951070000329e/badge?branch=master)](https://app.shippable.com/github/Smart-Spike/theming-service)
 
 ## Run
 Using sbt: 
