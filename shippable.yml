@@ -1,0 +1,10 @@
+language: scala
+
+scala:
+  - 2.12.1
+
+build:
+  ci:
+    - sbt compile
+    - sbt test
+    - sbt docker:publish
