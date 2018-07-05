@@ -6,7 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import org.scalatest._
-import theming.domain.Credentials
+import theming.domain.{Credentials, Theme}
 import theming.services.TokenService
 
 import scala.concurrent.ExecutionContextExecutor
@@ -67,6 +67,7 @@ class ThemingServiceTest extends AsyncFunSpec
 
         Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
           status shouldBe StatusCodes.OK
+          responseAs[Theme].theme shouldBe "DARK"
         }
       }
 
