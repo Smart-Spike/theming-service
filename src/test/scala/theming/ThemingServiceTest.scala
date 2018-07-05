@@ -55,17 +55,42 @@ class ThemingServiceTest extends AsyncFunSpec
 
     describe("theme") {
       val tokenService = new TokenService
+      val sealedRoutes = Route.seal(routes)
 
       it("returns unauthorized when there is no Authorization header") {
-        Get("/api/users/user-id/theme") ~> Route.seal(routes) ~> check {
+        Get("/api/users/user-id/theme") ~> sealedRoutes ~> check {
           status shouldBe StatusCodes.Unauthorized
         }
       }
-      it("returns OK when Authorization header is valid") {
+      it("returns OK when token has correct user id and USER role") {
+        val token = tokenService.createToken(testUser.copy(roles = Seq("USER")))
+
+        Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
+          status shouldBe StatusCodes.OK
+        }
+      }
+
+      it("returns OK when token has correct user id and ADMIN role") {
+        val token = tokenService.createToken(testUser.copy(roles = Seq("ADMIN")))
+
+        Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
+          status shouldBe StatusCodes.OK
+        }
+      }
+
+      it("returns forbidden when userId in the path is different from one in token") {
         val token = tokenService.createToken(testUser)
 
-        Get("/api/users/user-id/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
-          status shouldBe StatusCodes.OK
+        Get("/api/users/some-other-user-id/theme") ~> addHeader("Authorization", s"Bearer $token") ~> sealedRoutes ~> check {
+          status shouldBe StatusCodes.Forbidden
+        }
+      }
+
+      it("returns forbidden when has no roles") {
+        val token = tokenService.createToken(testUser.copy(roles = Seq()))
+
+        Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> sealedRoutes ~> check {
+          status shouldBe StatusCodes.Forbidden
         }
       }
     }
