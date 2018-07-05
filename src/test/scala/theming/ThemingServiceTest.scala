@@ -70,10 +70,10 @@ class ThemingServiceTest extends AsyncFunSpec
         }
       }
 
-      it("returns OK when token has correct user id and ADMIN role") {
+      it("returns OK when user is an ADMIN and requests other user's theme") {
         val token = tokenService.createToken(testUser.copy(roles = Seq("ADMIN")))
 
-        Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
+        Get("/api/users/some-other-user/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
           status shouldBe StatusCodes.OK
         }
       }

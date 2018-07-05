@@ -16,7 +16,7 @@ class ThemeRoutes(authenticator: AsyncAuthenticator[Auth])(implicit executionCon
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>
       authenticateOAuth2Async("my-realm", authenticator) { auth =>
-        authorize(userId == auth.userId && (auth.roles.contains("USER") || auth.roles.contains("ADMIN"))) {
+        authorize(auth.isAdmin || (auth.isUser && userId == auth.userId)) {
           get {
             logger.info(s"Auth context: $auth")
             complete(StatusCodes.OK)
