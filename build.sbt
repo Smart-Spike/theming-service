@@ -21,10 +21,13 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
   "org.liquibase" % "liquibase-core" % "3.0.5",
   "com.h2database" % "h2" % "1.4.197" % Test,
-  "mysql" % "mysql-connector-java" % "8.0.11"
+  "mysql" % "mysql-connector-java" % "8.0.11",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0"
 )
 
 enablePlugins(JavaAppPackaging)
+
+parallelExecution in Test := false
 
 version in Docker := "latest"
 dockerRepository := Some("smartspike")

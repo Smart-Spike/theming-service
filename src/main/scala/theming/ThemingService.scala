@@ -5,19 +5,31 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import theming.config.{ApplicationConfig, SchemaMigration}
+import theming.config.{ApplicationConfig, DatabaseConfig, SchemaMigration}
+import theming.domain.User
+import theming.repositories.UserRepository
 import theming.routes.{AuthRoutes, ThemeRoutes}
 import theming.security.AuthenticationDirective
 import theming.services.{TokenService, UserService}
 
 import scala.concurrent.ExecutionContext
 
-trait ThemingService {
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  implicit val executor: ExecutionContext
+class ThemingService(databaseConfig: DatabaseConfig)
+                    (implicit system: ActorSystem, materializer: ActorMaterializer, executor: ExecutionContext) {
+  private val userRepository = new UserRepository(databaseConfig.database)
 
-  private val userService = new UserService()
+  private def initializeTestUsers(): Unit = {
+    val testUsers: Seq[User] = Seq(
+      User(None, "admin@feature-service.com", "password123", Seq("USER", "ADMIN")),
+      User(None, "user@feature-service.com", "password123", Seq("USER")),
+      User(None, "user@some-company.com", "password123", Seq("USER"))
+    )
+    testUsers.foreach(userRepository.create)
+  }
+
+  initializeTestUsers()
+
+  private val userService = new UserService(userRepository)
   private val tokenService = new TokenService()
   private val authRoutes = new AuthRoutes(userService, tokenService).routes
   private val themeRoutes = new ThemeRoutes(AuthenticationDirective(tokenService)).routes
@@ -36,12 +48,13 @@ trait ThemingService {
     }
 }
 
-object Main extends App with ThemingService with ApplicationConfig {
-  override implicit val system: ActorSystem = ActorSystem()
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  override implicit val executor: ExecutionContext = system.dispatcher
+object Main extends App with ApplicationConfig {
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val executor: ExecutionContext = system.dispatcher
 
   new SchemaMigration(databaseConfig).run()
 
-  Http().bindAndHandle(routes, httpHost, httpPort)
+  private val themingService = new ThemingService(databaseConfig)
+  Http().bindAndHandle(themingService.routes, httpHost, httpPort)
 }

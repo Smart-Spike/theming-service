@@ -8,12 +8,12 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import org.scalatest._
 import theming.config.{ApplicationConfig, SchemaMigration}
 import theming.domain.{Credentials, Theme}
+import theming.repositories.UserRepository
 import theming.services.TokenService
 
 import scala.concurrent.ExecutionContextExecutor
 
 class ThemingServiceTest extends AsyncFunSpec
-  with ThemingService
   with Fixtures
   with ScalatestRouteTest
   with Matchers
@@ -22,6 +22,9 @@ class ThemingServiceTest extends AsyncFunSpec
   with ApplicationConfig {
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
+
+  val routes: Route = new ThemingService(databaseConfig).routes
+  val userRepository = new UserRepository(databaseConfig.database)
 
   override def beforeAll: Unit = {
     new SchemaMigration(databaseConfig).run()
@@ -53,10 +56,12 @@ class ThemingServiceTest extends AsyncFunSpec
       }
 
       it("returns Token for correct credentials") {
-        Post("/api/login", Credentials("admin@feature-service.com", "password123")) ~> routes ~> check {
-          status shouldBe StatusCodes.OK
-          contentType shouldBe ContentTypes.`text/plain(UTF-8)`
-          responseAs[String] should not be empty
+        userRepository.create(testUser.copy(id = None)) map { user =>
+          Post("/api/login", Credentials(testUser.email, testUser.password)) ~> routes ~> check {
+            status shouldBe StatusCodes.OK
+            contentType shouldBe ContentTypes.`text/plain(UTF-8)`
+            responseAs[String] should not be empty
+          }
         }
       }
     }
