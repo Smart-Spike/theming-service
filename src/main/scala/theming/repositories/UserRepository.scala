@@ -20,18 +20,22 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
   }
 
   def findByEmail(email: String): Future[Option[User]] = {
-    db.run(users.filter(_.email === email).result.headOption) flatMap {
-      case None => Future.successful(None)
-      case Some(user) => db.run(userRoles.filter(_.userId === user.id.get).result) map { userRoles =>
-        Some(user.copy(roles = userRoles.map(_.role)))
-      }
+    val usersWithRoles =
+      users.filter(_.email === email) joinLeft
+        userRoles on (_.id === _.userId)
+
+    db.run(usersWithRoles.result).map {
+      case Nil => None
+      case usersAndRoles =>
+        val (user, _) = usersAndRoles.head
+        Some(user.copy(roles = usersAndRoles.map(_._2).filter(_.isDefined).map(_.get.role)))
     }
   }
 
   private class Users(tag: Tag) extends Table[User](tag, "users") {
     def id = column[Option[String]]("id", O.PrimaryKey)
 
-    def email = column[String]("email")
+    def email = column[String]("email", O.Unique)
 
     def password = column[String]("password")
 
