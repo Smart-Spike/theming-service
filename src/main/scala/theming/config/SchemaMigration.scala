@@ -24,9 +24,7 @@ class SchemaMigration(config: DatabaseConfig) {
 
   private def createLiquibase(dbConnection: Connection, diffFilePath: String): Liquibase = {
     val database = DatabaseFactory.getInstance.findCorrectDatabaseImplementation(new JdbcConnection(dbConnection))
-    val classLoader = classOf[SchemaMigration].getClassLoader
-    val resourceAccessor = new ClassLoaderResourceAccessor(classLoader)
-    new Liquibase(diffFilePath, resourceAccessor, database)
+    new Liquibase(diffFilePath, new ClassLoaderResourceAccessor(), database)
   }
 
   def run(): Unit = {
