@@ -28,7 +28,10 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
       case Nil => None
       case usersAndRoles =>
         val (user, _) = usersAndRoles.head
-        Some(user.copy(roles = usersAndRoles.map(_._2).filter(_.isDefined).map(_.get.role)))
+        val roles = usersAndRoles collect {
+          case (_, Some(UserRole(_, role))) => role
+        }
+        Some(user.copy(roles = roles))
     }
   }
 
