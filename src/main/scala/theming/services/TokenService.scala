@@ -2,6 +2,7 @@ package theming.services
 
 import com.typesafe.scalalogging.Logger
 import io.circe._
+import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}

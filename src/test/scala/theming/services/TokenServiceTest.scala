@@ -1,5 +1,6 @@
 package theming.services
 
+import io.circe.generic.auto._
 import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
 import pdi.jwt.{Jwt, JwtOptions}

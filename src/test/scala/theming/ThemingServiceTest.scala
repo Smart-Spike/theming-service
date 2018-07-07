@@ -4,7 +4,8 @@ import akka.http.scaladsl.model.{ContentTypes, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import io.circe.generic.auto._
 import org.scalatest._
 import theming.config.{ApplicationConfig, SchemaMigration}
 import theming.domain.{Credentials, Theme}
@@ -17,7 +18,6 @@ class ThemingServiceTest extends AsyncFunSpec
   with Fixtures
   with ScalatestRouteTest
   with Matchers
-  with FailFastCirceSupport
   with BeforeAndAfterAll
   with ApplicationConfig {
 
