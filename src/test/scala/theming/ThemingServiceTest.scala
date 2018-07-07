@@ -28,15 +28,6 @@ class ThemingServiceTest extends AsyncFunSpec
 
   describe("Theming service") {
 
-    describe("healthcheck") {
-      it("responds with UP!") {
-        Get("/api/healthcheck") ~> routes ~> check {
-          responseAs[String] shouldEqual "UP!"
-          status shouldBe StatusCodes.OK
-        }
-      }
-    }
-
     describe("login") {
       it("returns Unauthorized for unknown user") {
         Post("/api/login", Credentials("hacker@hack.com", "123")) ~> routes ~> check {
