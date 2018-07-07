@@ -6,12 +6,12 @@ import akka.http.scaladsl.server.Route
 import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import theming.domain.Theme
+import theming.repositories.ThemeRepository
 import theming.security.AuthenticationDirective.AuthenticationDirective
 
 import scala.concurrent.ExecutionContext
 
-class ThemeRoutes(authenticate: AuthenticationDirective)(implicit executionContext: ExecutionContext) {
+class ThemeRoutes(authenticate: AuthenticationDirective, themeRepository: ThemeRepository)(implicit executionContext: ExecutionContext) {
 
   val logger = Logger(getClass)
 
@@ -20,8 +20,7 @@ class ThemeRoutes(authenticate: AuthenticationDirective)(implicit executionConte
       authenticate { auth =>
         authorize(auth.isAdmin || (auth.isUser && userId == auth.userId)) {
           get {
-            logger.info(s"Auth context: $auth")
-            complete(Theme(None, "DARK", Map("font" -> "large")))
+            complete(themeRepository.findById("DARK"))
           }
         }
       }

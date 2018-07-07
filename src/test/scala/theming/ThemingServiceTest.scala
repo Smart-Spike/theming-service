@@ -7,9 +7,9 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.scalatest._
-import theming.config.ApplicationConfig
+import theming.config.{ApplicationConfig, SchemaMigration}
 import theming.domain.{Credentials, Theme}
-import theming.repositories.{DatabaseSetupAndCleanup, UserRepository}
+import theming.repositories.UserRepository
 import theming.services.TokenService
 
 import scala.concurrent.ExecutionContextExecutor
@@ -19,12 +19,17 @@ class ThemingServiceTest extends AsyncFunSpec
   with ScalatestRouteTest
   with Matchers
   with ApplicationConfig
-  with DatabaseSetupAndCleanup {
+  with BeforeAndAfterAll {
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
 
-  val routes: Route = new ThemingService(databaseConfig).routes
+  lazy val routes: Route = new ThemingService(databaseConfig).routes
+
   val userRepository = new UserRepository(databaseConfig.database)
+
+  override protected def beforeAll(): Unit = {
+    new SchemaMigration(databaseConfig).run()
+  }
 
   describe("Theming service") {
 
@@ -52,19 +57,17 @@ class ThemingServiceTest extends AsyncFunSpec
       }
 
       it("returns Token for correct credentials") {
-        userRepository.create(testUser.copy(id = None)) map { user =>
-          Post("/api/login", Credentials(testUser.email, testUser.password)) ~> routes ~> check {
-            status shouldBe StatusCodes.OK
-            contentType shouldBe ContentTypes.`text/plain(UTF-8)`
-            responseAs[String] should not be empty
-          }
+        Post("/api/login", Credentials("admin@feature-service.com", "password123")) ~> routes ~> check {
+          status shouldBe StatusCodes.OK
+          contentType shouldBe ContentTypes.`text/plain(UTF-8)`
+          responseAs[String] should not be empty
         }
       }
     }
 
     describe("theme") {
       val tokenService = new TokenService
-      val sealedRoutes = Route.seal(routes)
+      lazy val sealedRoutes = Route.seal(routes)
 
       it("returns unauthorized when there is no Authorization header") {
         Get("/api/users/user-id/theme") ~> sealedRoutes ~> check {
@@ -72,11 +75,12 @@ class ThemingServiceTest extends AsyncFunSpec
         }
       }
       it("returns OK when token has correct user id and USER role") {
-        val token = tokenService.createToken(testUser.copy(roles = Seq("USER")))
-
-        Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
-          status shouldBe StatusCodes.OK
-          responseAs[Theme].name shouldBe "DARK"
+        userRepository.findByEmail("user@feature-service.com") map { user =>
+          val token = tokenService.createToken(user.get)
+          Get(s"/api/users/${user.get.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Theme].id shouldBe "DARK"
+          }
         }
       }
 

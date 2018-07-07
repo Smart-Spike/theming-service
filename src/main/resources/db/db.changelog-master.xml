@@ -31,15 +31,12 @@
 
     <changeSet id="3" author="chekalin">
         <createTable tableName="themes">
-            <column name="id" type="varchar(36)">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="varchar(50)">
-                <constraints nullable="false"/>
+            <column name="id" type="varchar(50)">
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
         <createTable tableName="theme_configs">
-            <column name="theme_id" type="varchar(36)">
+            <column name="theme_id" type="varchar(50)">
                 <constraints nullable="false" references="themes(id)" foreignKeyName="theme_configs_theme_fk"/>
             </column>
             <column name="config_key" type="varchar(50)">
@@ -50,4 +47,4 @@
             </column>
         </createTable>
     </changeSet>
-    </databaseChangeLog>
+</databaseChangeLog>

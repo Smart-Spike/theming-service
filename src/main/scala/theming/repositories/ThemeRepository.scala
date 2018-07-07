@@ -3,21 +3,19 @@ package theming.repositories
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 import theming.domain.Theme
-import theming.repositories.IdGenerator._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class ThemeRepository(db: Database)(implicit val executionContext: ExecutionContext) {
 
   def create(theme: Theme): Future[Theme] = {
-    val themeWithId = theme.copy(id = Some(generateId))
     val inserts = DBIO.seq(
-      themes += themeWithId,
+      themes += theme,
       themeConfigs ++= theme.config.map({
-        case (key, value) => ThemeConfig(themeWithId.id.get, key, value)
+        case (key, value) => ThemeConfig(theme.id, key, value)
       })
     )
-    db.run(inserts.transactionally).map(_ => themeWithId)
+    db.run(inserts.transactionally).map(_ => theme)
   }
 
   def findById(id: String): Future[Option[Theme]] = {
@@ -35,15 +33,13 @@ class ThemeRepository(db: Database)(implicit val executionContext: ExecutionCont
   }
 
   private class Themes(tag: Tag) extends Table[Theme](tag, "themes") {
-    def id = column[Option[String]]("id", O.PrimaryKey)
+    def id = column[String]("id", O.PrimaryKey)
 
-    def name = column[String]("name", O.Unique)
+    def * = id <> (constructTheme, extractTheme)
 
-    def * = (id, name) <> ((constructTheme _).tupled, extractTheme)
+    private def constructTheme(id: String) = Theme(id)
 
-    private def constructTheme(id: Option[String], name: String) = Theme(id, name)
-
-    private def extractTheme(theme: Theme) = Some((theme.id, theme.name))
+    private def extractTheme(theme: Theme) = Some(theme.id)
   }
 
   private val themes = TableQuery[Themes]

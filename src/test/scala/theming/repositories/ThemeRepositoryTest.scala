@@ -14,38 +14,30 @@ class ThemeRepositoryTest extends AsyncFunSpec
   val themeRepository = new ThemeRepository(databaseConfig.database)
 
   describe("ThemeRepository") {
-    it("saves theme without config") {
-      themeRepository.create(testTheme).map { theme =>
-        theme.id shouldBe defined
+
+    it("returns None when there is no theme") {
+      themeRepository.findById("non-existent-id").map { theme: Option[Theme] =>
+        theme should not be defined
       }
     }
 
-    describe("find by id") {
-      it("returns None when there is no theme") {
-        themeRepository.findById("non-existent-id").map { theme: Option[Theme] =>
-          theme should not be defined
-        }
+    it("returns theme when it exists") {
+      for {
+        savedTheme <- themeRepository.create(testTheme)
+        foundTheme <- themeRepository.findById(savedTheme.id)
+      } yield {
+        foundTheme.get.id shouldBe testTheme.id
+        foundTheme.get.config should contain theSameElementsAs testTheme.config
       }
+    }
 
-      it("returns theme when it exists") {
-        for {
-          savedTheme <- themeRepository.create(testTheme)
-          foundTheme <- themeRepository.findById(savedTheme.id.get)
-        } yield {
-          foundTheme shouldBe defined
-          foundTheme.get.name shouldBe testTheme.name
-          foundTheme.get.config should contain theSameElementsAs testTheme.config
-        }
-      }
-
-      it("returns theme with empty config") {
-        for {
-          savedTheme <- themeRepository.create(testTheme.copy(config = Map()))
-          foundTheme <- themeRepository.findById(savedTheme.id.get)
-        } yield {
-          foundTheme shouldBe defined
-          foundTheme.get.config shouldBe empty
-        }
+    it("returns theme with empty config") {
+      for {
+        savedTheme <- themeRepository.create(testTheme.copy(config = Map()))
+        foundTheme <- themeRepository.findById(savedTheme.id)
+      } yield {
+        foundTheme shouldBe defined
+        foundTheme.get.config shouldBe empty
       }
     }
   }
