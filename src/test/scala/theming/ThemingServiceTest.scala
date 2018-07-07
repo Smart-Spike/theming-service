@@ -18,18 +18,13 @@ class ThemingServiceTest extends AsyncFunSpec
   with Fixtures
   with ScalatestRouteTest
   with Matchers
-  with ApplicationConfig
-  with BeforeAndAfterAll {
+  with ApplicationConfig {
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
 
   lazy val routes: Route = new ThemingService(databaseConfig).routes
 
   val userRepository = new UserRepository(databaseConfig.database)
-
-  override protected def beforeAll(): Unit = {
-    new SchemaMigration(databaseConfig).run()
-  }
 
   describe("Theming service") {
 

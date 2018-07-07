@@ -16,6 +16,8 @@ import scala.concurrent.ExecutionContext
 
 class ThemingService(databaseConfig: DatabaseConfig)
                     (implicit system: ActorSystem, materializer: ActorMaterializer, executor: ExecutionContext) {
+  new SchemaMigration(databaseConfig).run()
+
   private val userRepository = new UserRepository(databaseConfig.database)
   private val themeRepository = new ThemeRepository(databaseConfig.database)
 
@@ -47,8 +49,6 @@ object Main extends App with ApplicationConfig {
   implicit val executor: ExecutionContext = system.dispatcher
 
   val logger = Logger(getClass)
-
-  new SchemaMigration(databaseConfig).run()
 
   private val themingService = new ThemingService(databaseConfig)
   Http().bindAndHandle(themingService.routes, httpHost, httpPort)
