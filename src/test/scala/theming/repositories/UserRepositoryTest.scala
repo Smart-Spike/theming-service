@@ -1,34 +1,16 @@
 package theming.repositories
 
 import org.scalatest._
-import slick.jdbc.MySQLProfile.api._
 import theming.Fixtures
-import theming.config.{ApplicationConfig, SchemaMigration}
-
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import theming.config.ApplicationConfig
 
 class UserRepositoryTest extends AsyncFunSpec
   with Matchers
   with ApplicationConfig
   with Fixtures
-  with BeforeAndAfterAll
-  with BeforeAndAfter {
+  with DatabaseSetupAndCleanup {
 
-  val database = databaseConfig.database
-  val userRepository = new UserRepository(database)
-
-  override protected def beforeAll(): Unit = {
-    new SchemaMigration(databaseConfig).run()
-  }
-
-  before {
-    val deleteAllFuture = database.run(DBIO.seq(
-      sqlu"delete from user_roles",
-      sqlu"delete from users"
-    ))
-    Await.result(deleteAllFuture, 5 seconds)
-  }
+  val userRepository = new UserRepository(databaseConfig.database)
 
   describe("UserRepository") {
 

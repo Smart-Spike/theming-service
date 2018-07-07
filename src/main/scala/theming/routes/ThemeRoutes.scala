@@ -21,7 +21,7 @@ class ThemeRoutes(authenticate: AuthenticationDirective)(implicit executionConte
         authorize(auth.isAdmin || (auth.isUser && userId == auth.userId)) {
           get {
             logger.info(s"Auth context: $auth")
-            complete(Theme("DARK", Map("font" -> "large")))
+            complete(Theme(None, "DARK", Map("font" -> "large")))
           }
         }
       }

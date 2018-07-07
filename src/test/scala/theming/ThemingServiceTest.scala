@@ -7,9 +7,9 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.scalatest._
-import theming.config.{ApplicationConfig, SchemaMigration}
+import theming.config.ApplicationConfig
 import theming.domain.{Credentials, Theme}
-import theming.repositories.UserRepository
+import theming.repositories.{DatabaseSetupAndCleanup, UserRepository}
 import theming.services.TokenService
 
 import scala.concurrent.ExecutionContextExecutor
@@ -18,17 +18,13 @@ class ThemingServiceTest extends AsyncFunSpec
   with Fixtures
   with ScalatestRouteTest
   with Matchers
-  with BeforeAndAfterAll
-  with ApplicationConfig {
+  with ApplicationConfig
+  with DatabaseSetupAndCleanup {
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
 
   val routes: Route = new ThemingService(databaseConfig).routes
   val userRepository = new UserRepository(databaseConfig.database)
-
-  override def beforeAll: Unit = {
-    new SchemaMigration(databaseConfig).run()
-  }
 
   describe("Theming service") {
 
@@ -80,7 +76,7 @@ class ThemingServiceTest extends AsyncFunSpec
 
         Get(s"/api/users/${testUser.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
           status shouldBe StatusCodes.OK
-          responseAs[Theme].theme shouldBe "DARK"
+          responseAs[Theme].name shouldBe "DARK"
         }
       }
 

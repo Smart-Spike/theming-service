@@ -5,6 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+import com.typesafe.scalalogging.Logger
 import theming.config.{ApplicationConfig, DatabaseConfig, SchemaMigration}
 import theming.domain.User
 import theming.repositories.UserRepository
@@ -53,8 +54,12 @@ object Main extends App with ApplicationConfig {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executor: ExecutionContext = system.dispatcher
 
+  val logger = Logger(getClass)
+
   new SchemaMigration(databaseConfig).run()
 
   private val themingService = new ThemingService(databaseConfig)
   Http().bindAndHandle(themingService.routes, httpHost, httpPort)
+
+  logger.info(s"Server started on port $httpPort")
 }

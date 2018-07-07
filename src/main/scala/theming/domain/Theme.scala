@@ -1,4 +1,4 @@
 package theming.domain
 
-case class Theme(theme: String, config: Map[String, String])
+case class Theme(id: Option[String], name: String, config: Map[String, String] = Map())
 

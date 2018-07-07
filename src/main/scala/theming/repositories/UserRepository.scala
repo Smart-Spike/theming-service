@@ -1,17 +1,16 @@
 package theming.repositories
 
-import java.util.UUID
-
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 import theming.domain.User
+import theming.repositories.IdGenerator._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserRepository(db: Database)(implicit val executionContext: ExecutionContext) {
 
   def create(user: User): Future[User] = {
-    val userId = UUID.randomUUID().toString
+    val userId = generateId
     val userWithId = user.copy(id = Some(userId))
     db.run(DBIO.seq(
       users += userWithId,
