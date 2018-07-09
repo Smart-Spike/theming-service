@@ -22,7 +22,7 @@ class ThemingServiceTest extends AsyncFunSpec
   with Matchers
   with ApplicationConfig {
 
-  implicit val timeout = RouteTestTimeout(5.seconds dilated)
+  implicit val timeout = RouteTestTimeout(10.seconds dilated)
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
 
