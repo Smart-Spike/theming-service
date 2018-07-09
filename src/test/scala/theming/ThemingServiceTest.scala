@@ -2,23 +2,27 @@ package theming
 
 import akka.http.scaladsl.model.{ContentTypes, StatusCodes}
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
+import akka.testkit.TestDuration
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import org.scalatest._
-import theming.config.{ApplicationConfig, SchemaMigration}
+import theming.config.ApplicationConfig
 import theming.domain.{Credentials, Theme}
 import theming.repositories.UserRepository
 import theming.services.TokenService
 
 import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.duration._
 
 class ThemingServiceTest extends AsyncFunSpec
   with Fixtures
   with ScalatestRouteTest
   with Matchers
   with ApplicationConfig {
+
+  implicit val timeout = RouteTestTimeout(5.seconds dilated)
 
   override implicit val executor: ExecutionContextExecutor = system.dispatcher
 
