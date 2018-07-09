@@ -28,16 +28,17 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
           get {
             onSuccess(userRepository.findById(userId)) {
               case None => complete(StatusCodes.NotFound)
-              case Some(user) => user.company match {
-                case None => complete(themeRepository.findById(Theme.Default))
-                case Some(company) =>
-                  complete(themeRepository.findById(company.defaultThemeId))
-              }
+              case Some(user) =>
+                val themeId = user.company match {
+                  case Some(company) => company.defaultThemeId
+                  case None => Theme.Default
+                }
+                complete(themeRepository.findById(themeId))
             }
           }
         }
       }
     }
   }
-
 }
+
