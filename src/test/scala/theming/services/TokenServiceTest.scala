@@ -5,7 +5,7 @@ import io.circe.parser._
 import org.scalatest.{FunSpec, Matchers}
 import pdi.jwt.{Jwt, JwtOptions}
 import theming.Fixtures
-import theming.domain.Auth
+import theming.domain.{Auth, Roles}
 
 class TokenServiceTest extends FunSpec with Matchers with Fixtures {
 
@@ -29,7 +29,7 @@ class TokenServiceTest extends FunSpec with Matchers with Fixtures {
       }
 
       it("should create token with roles") {
-        val expectedRoles = Seq("ADMIN", "USER")
+        val expectedRoles = Seq(Roles.CompanyAdmin, Roles.User)
 
         val rawToken = tokenService.createToken(testUser.copy(roles = expectedRoles))
 

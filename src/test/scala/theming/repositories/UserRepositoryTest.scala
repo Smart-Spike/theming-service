@@ -49,7 +49,7 @@ class UserRepositoryTest extends AsyncFunSpec
 
     it("finds user by email") {
       for {
-        user <- userRepository.create(testUser.copy(id = None, roles = Seq("USER", "ADMIN")))
+        user <- userRepository.create(testUser.copy(id = None))
         result <- userRepository.findByEmail(testUser.email)
       } yield {
         result shouldBe defined
@@ -60,7 +60,7 @@ class UserRepositoryTest extends AsyncFunSpec
 
     it("finds user by id") {
       for {
-        user <- userRepository.create(testUser.copy(id = None, roles = Seq("USER", "ADMIN")))
+        user <- userRepository.create(testUser.copy(id = None))
         result <- userRepository.findById(user.id.get)
       } yield {
         result shouldBe defined

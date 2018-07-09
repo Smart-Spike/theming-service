@@ -1,7 +1,7 @@
 package theming.services
 
 import com.typesafe.scalalogging.Logger
-import theming.domain.{Company, Theme, User}
+import theming.domain.{Company, Roles, Theme, User}
 import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 
 import scala.concurrent.duration._
@@ -41,9 +41,11 @@ class TestDataInitializer(userRepository: UserRepository,
 
   private def createUsers(companies: Iterable[Company]): Future[Iterable[User]] = {
     val testUsers: Seq[User] = Seq(
-      User(None, "admin@feature-service.com", "password123", Some(companies.find(_.name == "Google").head), Seq("USER", "ADMIN")),
-      User(None, "user@feature-service.com", "password123", Some(companies.find(_.name == "Amazon").head), Seq("USER")),
-      User(None, "user@some-company.com", "password123", None, Seq("USER"))
+      User(None, "admin@feature-service.com", "password123", None, Seq(Roles.PlatformAdmin)),
+      User(None, "admin@google.com", "password123", Some(companies.find(_.name == "Google").head), Seq(Roles.User, Roles.CompanyAdmin)),
+      User(None, "user@google.com", "password123", Some(companies.find(_.name == "Google").head), Seq(Roles.User)),
+      User(None, "user@amazon.com", "password123", Some(companies.find(_.name == "Amazon").head), Seq(Roles.User)),
+      User(None, "user@microsoft.com", "password123", Some(companies.filter(_.name == "Microsoft").head), Seq(Roles.PlatformAdmin))
     )
 
     def saveOrRetrieve(user: User): Future[User] =

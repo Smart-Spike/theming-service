@@ -1,3 +1,5 @@
 package theming.domain
 
-case class User(id: Option[String], email: String, password: String, company: Option[Company], roles: Seq[String])
+import theming.domain.Roles.Role
+
+case class User(id: Option[String], email: String, password: String, company: Option[Company], roles: Seq[Role])

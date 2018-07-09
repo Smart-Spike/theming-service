@@ -24,7 +24,7 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>
       authenticate { auth =>
-        authorize(auth.isAdmin || (auth.isUser && userId == auth.userId)) {
+        authorize(auth.isPlatformAdmin || auth.isCompanyAdmin || (auth.isUser && userId == auth.userId)) {
           get {
             onSuccess(userRepository.findById(userId)) {
               case None => complete(StatusCodes.NotFound)

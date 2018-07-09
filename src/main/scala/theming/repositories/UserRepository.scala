@@ -2,6 +2,7 @@ package theming.repositories
 
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
+import theming.domain.Roles.Role
 import theming.domain.{Company, User}
 import theming.repositories.IdGenerator._
 
@@ -14,7 +15,7 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
     val userWithId = user.copy(id = Some(userId))
     db.run(DBIO.seq(
       users += UserRecord.from(userWithId),
-      userRoles ++= user.roles.map(UserRole(userId, _))
+      userRoles ++= user.roles.map(role => UserRole(userId, role.name))
     ).transactionally).map(_ => userWithId)
   }
 
@@ -36,14 +37,14 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
       case userRecordsCompaniesAndRoles =>
         val ((userRecord, company), _) = userRecordsCompaniesAndRoles.head
         val roles = userRecordsCompaniesAndRoles collect {
-          case (_, Some(UserRole(_, role))) => role
+          case (_, Some(UserRole(_, roleName))) => Role(roleName)
         }
         Some(userRecord.asUser(roles, company))
     }
   }
 
   private case class UserRecord(id: String, email: String, password: String, companyId: Option[String]) {
-    def asUser(roles: Seq[String], company: Option[Company]): User = User(Some(id), email, password, company, roles)
+    def asUser(roles: Seq[Role], company: Option[Company]): User = User(Some(id), email, password, company, roles)
   }
 
   private object UserRecord {

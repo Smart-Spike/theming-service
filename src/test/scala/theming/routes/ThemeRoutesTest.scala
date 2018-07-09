@@ -10,7 +10,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatest.{AsyncFunSpec, Matchers}
 import theming.Fixtures
-import theming.domain.Theme
+import theming.domain.{Roles, Theme}
 import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 import theming.security.AuthenticationDirective
 import theming.services.TokenService
@@ -45,7 +45,7 @@ class ThemeRoutesTest extends AsyncFunSpec
     }
 
     it("returns OK when token has correct user id and USER role") {
-      val user = testUser.copy(roles = Seq("USER"))
+      val user = testUser.copy(roles = Seq(Roles.User))
       val token = tokenService.createToken(user)
       Get(s"/users/${user.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
         status shouldBe StatusCodes.OK
@@ -53,8 +53,8 @@ class ThemeRoutesTest extends AsyncFunSpec
       }
     }
 
-    it("returns OK when user is an ADMIN and requests other user's theme") {
-      val token = tokenService.createToken(testUser.copy(roles = Seq("ADMIN")))
+    it("returns OK when user is PlatformAdmin and requests other user's theme") {
+      val token = tokenService.createToken(testUser.copy(roles = Seq(Roles.PlatformAdmin)))
       Get(s"/users/some-ther-user/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
         status shouldBe StatusCodes.OK
       }
