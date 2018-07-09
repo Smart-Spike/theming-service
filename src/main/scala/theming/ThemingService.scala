@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.Logger
 import theming.config.{ApplicationConfig, DatabaseConfig, SchemaMigration}
-import theming.repositories.{ThemeRepository, UserRepository}
+import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 import theming.routes.{AuthRoutes, ThemeRoutes}
 import theming.security.AuthenticationDirective
 import theming.services.{TestDataInitializer, TokenService, UserService}
@@ -20,14 +20,15 @@ class ThemingService(databaseConfig: DatabaseConfig)
 
   private val userRepository = new UserRepository(databaseConfig.database)
   private val themeRepository = new ThemeRepository(databaseConfig.database)
+  private val companyRepository = new CompanyRepository(databaseConfig.database)
 
-  new TestDataInitializer(userRepository, themeRepository).initialize()
+  new TestDataInitializer(userRepository, themeRepository, companyRepository).initialize()
 
   private val userService = new UserService(userRepository)
   private val tokenService = new TokenService()
   private val authRoutes = new AuthRoutes(userService, tokenService).routes
 
-  private val themeRoutes = new ThemeRoutes(AuthenticationDirective(tokenService), themeRepository).routes
+  private val themeRoutes = new ThemeRoutes(AuthenticationDirective(tokenService), themeRepository, userRepository, companyRepository).routes
 
   private val healthCheckRoute = pathPrefix("healthcheck") {
     get {

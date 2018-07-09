@@ -65,16 +65,19 @@ class ThemingServiceTest extends AsyncFunSpec
           val token = tokenService.createToken(user.get)
           Get(s"/api/users/${user.get.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
             status shouldBe StatusCodes.OK
-            responseAs[Theme].id shouldBe "DARK"
+            responseAs[Theme].id shouldBe "ORANGE"
           }
         }
       }
 
       it("returns OK when user is an ADMIN and requests other user's theme") {
         val token = tokenService.createToken(testUser.copy(roles = Seq("ADMIN")))
-
-        Get("/api/users/some-other-user/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
-          status shouldBe StatusCodes.OK
+        for {
+          someOtherUser <- userRepository.findByEmail("user@some-company.com")
+        } yield {
+          Get(s"/api/users/${someOtherUser.get.id.get}/theme") ~> addHeader("Authorization", s"Bearer $token") ~> routes ~> check {
+            status shouldBe StatusCodes.OK
+          }
         }
       }
 

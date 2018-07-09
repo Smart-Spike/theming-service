@@ -47,4 +47,23 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="4" author="chekalin">
+        <createTable tableName="companies">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="default_theme_id" type="varchar(50)">
+                <constraints nullable="true" references="themes(id)" foreignKeyName="companies_theme_fk"/>
+            </column>
+        </createTable>
+        <addColumn tableName="users">
+            <column name="company_id" type="varchar(36)">
+                <constraints nullable="true" references="companies(id)" foreignKeyName="users_company_fk"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

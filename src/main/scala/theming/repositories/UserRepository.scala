@@ -19,9 +19,16 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
   }
 
   def findByEmail(email: String): Future[Option[User]] = {
+    findByPredicate(_.email === email)
+  }
+
+  def findById(id: String): Future[Option[User]] = {
+    findByPredicate(_.id === id)
+  }
+
+  private def findByPredicate(predicate: Users => Rep[Option[Boolean]]): Future[Option[User]] = {
     val usersWithRoles =
-      users.filter(_.email === email) joinLeft
-        userRoles on (_.id === _.userId)
+      users.filter(predicate) joinLeft userRoles on (_.id === _.userId)
 
     db.run(usersWithRoles.result).map {
       case Nil => None
@@ -41,11 +48,13 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
 
     def password = column[String]("password")
 
-    def * = (id, email, password) <> ((constructUser _).tupled, extractUser)
+    def companyId = column[Option[String]]("company_id")
 
-    private def constructUser(id: Option[String], email: String, password: String) = User(id, email, password, Seq())
+    def * = (id, email, password, companyId) <> ((constructUser _).tupled, extractUser)
 
-    private def extractUser(user: User) = Some((user.id, user.email, user.password))
+    private def constructUser(id: Option[String], email: String, password: String, companyId: Option[String]) = User(id, email, password, companyId, Seq())
+
+    private def extractUser(user: User) = Some((user.id, user.email, user.password, user.companyId))
   }
 
   private val users = TableQuery[Users]

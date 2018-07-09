@@ -12,6 +12,8 @@ class UserRepositoryTest extends AsyncFunSpec
 
   val userRepository = new UserRepository(databaseConfig.database)
 
+  val companyRepository = new CompanyRepository(databaseConfig.database)
+
   describe("UserRepository") {
 
     it("creates new user") {
@@ -26,10 +28,32 @@ class UserRepositoryTest extends AsyncFunSpec
       }
     }
 
+    it("saves and retrieves user with company") {
+      for {
+        company <- companyRepository.create(testCompany)
+        user <- userRepository.create(testUser.copy(companyId = company.id))
+        foundUser <- userRepository.findByEmail(user.email)
+      } yield {
+        foundUser.get.companyId shouldBe defined
+      }
+
+    }
+
     it("finds user by email") {
       for {
         user <- userRepository.create(testUser.copy(id = None, roles = Seq("USER", "ADMIN")))
         result <- userRepository.findByEmail(testUser.email)
+      } yield {
+        result shouldBe defined
+        result.get.id shouldBe user.id
+        result.get.roles should contain only (user.roles: _*)
+      }
+    }
+
+    it("finds user by id") {
+      for {
+        user <- userRepository.create(testUser.copy(id = None, roles = Seq("USER", "ADMIN")))
+        result <- userRepository.findById(user.id.get)
       } yield {
         result shouldBe defined
         result.get.id shouldBe user.id

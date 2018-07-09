@@ -21,6 +21,7 @@ trait DatabaseSetupAndCleanup extends SuiteMixin with BeforeAndAfter with Before
       sqlu"delete from user_roles",
       sqlu"delete from users",
       sqlu"delete from theme_configs",
+      sqlu"delete from companies",
       sqlu"delete from themes"
     ))
     Await.result(deleteAllFuture, 5 seconds)
