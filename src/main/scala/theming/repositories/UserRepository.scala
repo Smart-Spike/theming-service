@@ -2,7 +2,7 @@ package theming.repositories
 
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
-import theming.domain.User
+import theming.domain.{Company, User}
 import theming.repositories.IdGenerator._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,7 +13,7 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
     val userId = generateId
     val userWithId = user.copy(id = Some(userId))
     db.run(DBIO.seq(
-      users += userWithId,
+      users += UserRecord.from(userWithId),
       userRoles ++= user.roles.map(UserRole(userId, _))
     ).transactionally).map(_ => userWithId)
   }
@@ -27,22 +27,31 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
   }
 
   private def findByPredicate(predicate: Users => Rep[Option[Boolean]]): Future[Option[User]] = {
-    val usersWithRoles =
-      users.filter(predicate) joinLeft userRoles on (_.id === _.userId)
+    val query = (users.filter(predicate)
+      joinLeft CompanyRepository.companies on (_.companyId === _.id)
+      joinLeft userRoles on (_._1.id === _.userId))
 
-    db.run(usersWithRoles.result).map {
+    db.run(query.result).map {
       case Nil => None
-      case usersAndRoles =>
-        val (user, _) = usersAndRoles.head
-        val roles = usersAndRoles collect {
+      case userRecordsCompaniesAndRoles =>
+        val ((userRecord, company), _) = userRecordsCompaniesAndRoles.head
+        val roles = userRecordsCompaniesAndRoles collect {
           case (_, Some(UserRole(_, role))) => role
         }
-        Some(user.copy(roles = roles))
+        Some(userRecord.asUser(roles, company))
     }
   }
 
-  private class Users(tag: Tag) extends Table[User](tag, "users") {
-    def id = column[Option[String]]("id", O.PrimaryKey)
+  private case class UserRecord(id: String, email: String, password: String, companyId: Option[String]) {
+    def asUser(roles: Seq[String], company: Option[Company]): User = User(Some(id), email, password, company, roles)
+  }
+
+  private object UserRecord {
+    def from(user: User) = UserRecord(user.id.get, user.email, user.password, user.company.flatMap(company => company.id))
+  }
+
+  private class Users(tag: Tag) extends Table[UserRecord](tag, "users") {
+    def id = column[String]("id", O.PrimaryKey)
 
     def email = column[String]("email", O.Unique)
 
@@ -50,11 +59,8 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
 
     def companyId = column[Option[String]]("company_id")
 
-    def * = (id, email, password, companyId) <> ((constructUser _).tupled, extractUser)
+    def * = (id, email, password, companyId) <> ((UserRecord.apply _).tupled, UserRecord.unapply)
 
-    private def constructUser(id: Option[String], email: String, password: String, companyId: Option[String]) = User(id, email, password, companyId, Seq())
-
-    private def extractUser(user: User) = Some((user.id, user.email, user.password, user.companyId))
   }
 
   private val users = TableQuery[Users]

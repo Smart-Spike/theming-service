@@ -41,8 +41,8 @@ class TestDataInitializer(userRepository: UserRepository,
 
   private def createUsers(companies: Iterable[Company]): Future[Iterable[User]] = {
     val testUsers: Seq[User] = Seq(
-      User(None, "admin@feature-service.com", "password123", companies.find(_.name == "Google").head.id, Seq("USER", "ADMIN")),
-      User(None, "user@feature-service.com", "password123", companies.find(_.name == "Amazon").head.id, Seq("USER")),
+      User(None, "admin@feature-service.com", "password123", Some(companies.find(_.name == "Google").head), Seq("USER", "ADMIN")),
+      User(None, "user@feature-service.com", "password123", Some(companies.find(_.name == "Amazon").head), Seq("USER")),
       User(None, "user@some-company.com", "password123", None, Seq("USER"))
     )
 

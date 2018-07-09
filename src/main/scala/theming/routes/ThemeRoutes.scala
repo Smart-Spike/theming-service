@@ -29,12 +29,10 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
           get {
             onSuccess(userRepository.findById(userId)) {
               case None => complete(StatusCodes.NotFound)
-              case Some(user) => user.companyId match {
+              case Some(user) => user.company match {
                 case None => complete(themeRepository.findById(DefaultThemeId))
-                case Some(companyId) =>
-                  onSuccess(companyRepository.findById(companyId)) { company =>
-                    complete(themeRepository.findById(company.get.defaultThemeId.getOrElse(DefaultThemeId)))
-                  }
+                case Some(company) =>
+                  complete(themeRepository.findById(company.defaultThemeId.getOrElse(DefaultThemeId)))
               }
             }
           }

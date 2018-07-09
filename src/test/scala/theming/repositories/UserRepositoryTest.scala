@@ -31,10 +31,10 @@ class UserRepositoryTest extends AsyncFunSpec
     it("saves and retrieves user with company") {
       for {
         company <- companyRepository.create(testCompany)
-        user <- userRepository.create(testUser.copy(companyId = company.id))
+        user <- userRepository.create(testUser.copy(company = Some(company)))
         foundUser <- userRepository.findByEmail(user.email)
       } yield {
-        foundUser.get.companyId shouldBe defined
+        foundUser.get.company shouldBe defined
       }
 
     }

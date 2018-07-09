@@ -9,6 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyRepository(db: Database)(implicit executionContext: ExecutionContext) {
 
+  import CompanyRepository._
+
   def create(company: Company): Future[Company] = {
     val companyWithId = company.copy(id = Some(generateId))
     db.run(companies += companyWithId).map(_ => companyWithId)
@@ -19,6 +21,10 @@ class CompanyRepository(db: Database)(implicit executionContext: ExecutionContex
 
   def findByName(name: String): Future[Option[Company]] =
     db.run(companies.filter(_.name === name).result.headOption)
+
+}
+
+object CompanyRepository {
 
   private[repositories] class Companies(tag: Tag) extends Table[Company](tag, "companies") {
     def id = column[Option[String]]("id", O.PrimaryKey)
@@ -31,6 +37,5 @@ class CompanyRepository(db: Database)(implicit executionContext: ExecutionContex
   }
 
   private[repositories] val companies = TableQuery[Companies]
-
 }
 
