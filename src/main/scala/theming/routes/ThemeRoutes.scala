@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import theming.domain.Theme
 import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 import theming.security.AuthenticationDirective.AuthenticationDirective
 
@@ -20,8 +21,6 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
 
   val logger = Logger(getClass)
 
-  val DefaultThemeId = "LIGHT"
-
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>
       authenticate { auth =>
@@ -30,9 +29,9 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
             onSuccess(userRepository.findById(userId)) {
               case None => complete(StatusCodes.NotFound)
               case Some(user) => user.company match {
-                case None => complete(themeRepository.findById(DefaultThemeId))
+                case None => complete(themeRepository.findById(Theme.Default))
                 case Some(company) =>
-                  complete(themeRepository.findById(company.defaultThemeId.getOrElse(DefaultThemeId)))
+                  complete(themeRepository.findById(company.defaultThemeId))
               }
             }
           }

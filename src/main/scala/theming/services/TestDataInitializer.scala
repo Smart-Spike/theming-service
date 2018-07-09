@@ -21,9 +21,9 @@ class TestDataInitializer(userRepository: UserRepository,
   )
 
   val TestCompanies: Seq[Company] = Seq(
-    Company(None, "Google", Some("DARK")),
-    Company(None, "Amazon", Some("ORANGE")),
-    Company(None, "Microsoft", None)
+    Company(None, "Google", "DARK"),
+    Company(None, "Amazon", "ORANGE"),
+    Company(None, "Microsoft", "LIGHT")
   )
 
   def initialize(): Unit = {

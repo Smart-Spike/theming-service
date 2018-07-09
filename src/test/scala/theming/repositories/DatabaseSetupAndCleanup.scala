@@ -1,13 +1,13 @@
 package theming.repositories
 
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Suite, SuiteMixin}
+import org.scalatest.{BeforeAndAfterAll, Suite, SuiteMixin}
 import slick.jdbc.MySQLProfile.api._
 import theming.config.{DatabaseConfig, SchemaMigration}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-trait DatabaseSetupAndCleanup extends SuiteMixin with BeforeAndAfter with BeforeAndAfterAll {
+trait DatabaseSetupAndCleanup extends SuiteMixin with BeforeAndAfterAll {
   this: Suite =>
 
   def databaseConfig: DatabaseConfig
@@ -16,7 +16,7 @@ trait DatabaseSetupAndCleanup extends SuiteMixin with BeforeAndAfter with Before
     new SchemaMigration(databaseConfig).run()
   }
 
-  before {
+  protected def deleteAll() {
     val deleteAllFuture = databaseConfig.database.run(DBIO.seq(
       sqlu"delete from user_roles",
       sqlu"delete from users",

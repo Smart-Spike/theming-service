@@ -31,7 +31,7 @@ object CompanyRepository {
 
     def name = column[String]("name", O.Unique)
 
-    def defaultThemeId = column[Option[String]]("default_theme_id")
+    def defaultThemeId = column[String]("default_theme_id")
 
     def * = (id, name, defaultThemeId) <> ((Company.apply _).tupled, Company.unapply)
   }

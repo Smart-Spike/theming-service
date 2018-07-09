@@ -1,6 +1,6 @@
 package theming.repositories
 
-import org.scalatest.{AsyncFunSpec, Matchers}
+import org.scalatest.{AsyncFunSpec, BeforeAndAfter, Matchers}
 import theming.Fixtures
 import theming.config.ApplicationConfig
 import theming.domain.Theme
@@ -9,9 +9,14 @@ class ThemeRepositoryTest extends AsyncFunSpec
   with Matchers
   with ApplicationConfig
   with Fixtures
-  with DatabaseSetupAndCleanup {
+  with DatabaseSetupAndCleanup
+  with BeforeAndAfter {
 
   val themeRepository = new ThemeRepository(databaseConfig.database)
+
+  before {
+    deleteAll()
+  }
 
   describe("ThemeRepository") {
 

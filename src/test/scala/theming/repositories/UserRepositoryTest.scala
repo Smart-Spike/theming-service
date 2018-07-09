@@ -8,11 +8,19 @@ class UserRepositoryTest extends AsyncFunSpec
   with Matchers
   with ApplicationConfig
   with Fixtures
-  with DatabaseSetupAndCleanup {
+  with DatabaseSetupAndCleanup
+  with BeforeAndAfter {
 
   val userRepository = new UserRepository(databaseConfig.database)
 
   val companyRepository = new CompanyRepository(databaseConfig.database)
+
+  val themeRepository = new ThemeRepository(databaseConfig.database)
+
+  before {
+    deleteAll()
+    themeRepository.create(testTheme)
+  }
 
   describe("UserRepository") {
 
