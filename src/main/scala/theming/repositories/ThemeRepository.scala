@@ -35,11 +35,7 @@ class ThemeRepository(db: Database)(implicit val executionContext: ExecutionCont
   private class Themes(tag: Tag) extends Table[Theme](tag, "themes") {
     def id = column[String]("id", O.PrimaryKey)
 
-    def * = id <> (constructTheme, extractTheme)
-
-    private def constructTheme(id: String) = Theme(id)
-
-    private def extractTheme(theme: Theme) = Some(theme.id)
+    def * = id <> (id => Theme(id), (theme: Theme) => Some(theme.id))
   }
 
   private val themes = TableQuery[Themes]
@@ -53,7 +49,7 @@ class ThemeRepository(db: Database)(implicit val executionContext: ExecutionCont
 
     def value = column[String]("config_value")
 
-    def * = (themeId, key, value) <> ((ThemeConfig.apply _).tupled, ThemeConfig.unapply)
+    def * = (themeId, key, value).mapTo[ThemeConfig]
   }
 
   private val themeConfigs = TableQuery[ThemeConfigs]

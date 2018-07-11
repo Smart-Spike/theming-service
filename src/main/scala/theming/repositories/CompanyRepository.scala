@@ -33,7 +33,7 @@ object CompanyRepository {
 
     def defaultThemeId = column[String]("default_theme_id")
 
-    def * = (id, name, defaultThemeId) <> ((Company.apply _).tupled, Company.unapply)
+    def * = (id, name, defaultThemeId).mapTo[Company]
   }
 
   private[repositories] val companies = TableQuery[Companies]
