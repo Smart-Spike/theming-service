@@ -14,10 +14,9 @@ class UserRepository(db: Database)(implicit val executionContext: ExecutionConte
   def create(user: User): Future[User] = {
     val userId = generateId
     val userWithId = user.copy(id = Some(userId))
-    db.run(DBIO.seq(
-      users += createRecord(userWithId),
-      userRoles ++= user.roles.map(role => UserRole(userId, role.name))
-    ).transactionally).map(_ => userWithId)
+    val createUser = users += createRecord(userWithId)
+    val createRoles = userRoles ++= user.roles.map(role => UserRole(userId, role.name))
+    db.run((createUser andThen createRoles).transactionally).map(_ => userWithId)
   }
 
   def findByEmail(email: String): Future[Option[User]] = {
