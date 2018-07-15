@@ -1,6 +1,6 @@
 package theming.services
 
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.LazyLogging
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -11,9 +11,7 @@ import theming.domain.{Auth, User}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-class TokenService {
-
-  val logger = Logger(getClass)
+class TokenService extends LazyLogging {
 
   private val tempKey = "mySuperSecretKey"
 

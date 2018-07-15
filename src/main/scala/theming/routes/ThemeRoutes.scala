@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.server.Route
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import theming.domain.Theme
@@ -17,9 +17,7 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
                   themeRepository: ThemeRepository,
                   userRepository: UserRepository,
                   companyRepository: CompanyRepository)
-                 (implicit executionContext: ExecutionContext) {
-
-  val logger = Logger(getClass)
+                 (implicit executionContext: ExecutionContext) extends LazyLogging {
 
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>

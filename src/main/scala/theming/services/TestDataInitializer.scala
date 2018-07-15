@@ -1,6 +1,6 @@
 package theming.services
 
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.LazyLogging
 import theming.domain.{Company, Roles, Theme, User}
 import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 
@@ -10,9 +10,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class TestDataInitializer(userRepository: UserRepository,
                           themeRepository: ThemeRepository,
                           companyRepository: CompanyRepository)
-                         (implicit executionContext: ExecutionContext) {
-
-  val logger = Logger(getClass)
+                         (implicit executionContext: ExecutionContext) extends LazyLogging {
 
   val TestThemes = Map(
     "DARK" -> Map("font" -> "large", "menu" -> "left"),

@@ -3,15 +3,13 @@ package theming.config
 import java.sql.Connection
 import java.util.Properties
 
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.LazyLogging
 import liquibase.Liquibase
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.ClassLoaderResourceAccessor
 
-class SchemaMigration(config: DatabaseConfig) {
-
-  val logger = Logger(getClass)
+class SchemaMigration(config: DatabaseConfig) extends LazyLogging {
 
   val masterChangeLogFile = "db/db.changelog-master.xml"
 

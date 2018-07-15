@@ -5,7 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.LazyLogging
 import theming.config.{ApplicationConfig, DatabaseConfig, SchemaMigration}
 import theming.repositories.{CompanyRepository, ThemeRepository, UserRepository}
 import theming.routes.{AuthRoutes, ThemeRoutes}
@@ -44,12 +44,10 @@ class ThemingService(databaseConfig: DatabaseConfig)
     }
 }
 
-object Main extends App with ApplicationConfig {
+object Main extends App with ApplicationConfig with LazyLogging {
   implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executor: ExecutionContext = system.dispatcher
-
-  val logger = Logger(getClass)
 
   private val themingService = new ThemingService(databaseConfig)
   Http().bindAndHandle(themingService.routes, httpHost, httpPort)
