@@ -20,9 +20,8 @@ class TokenServiceTest extends FunSpec with Matchers with Fixtures {
         val rawToken = tokenService.createToken(testUser.copy(id = Some(expectedUserId)))
 
         for {
-          decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
-          json <- parse(decoded)
-          auth <- json.as[Auth]
+          rawJsonString <- Jwt.decode(rawToken, JwtOptions(signature = false))
+          auth <- decode[Auth](rawJsonString)
         } {
           auth.userId shouldBe expectedUserId
         }
@@ -34,11 +33,24 @@ class TokenServiceTest extends FunSpec with Matchers with Fixtures {
         val rawToken = tokenService.createToken(testUser.copy(roles = expectedRoles))
 
         for {
-          decoded <- Jwt.decode(rawToken, JwtOptions(signature = false))
-          json <- parse(decoded)
-          auth <- json.as[Auth]
+          rawJsonString <- Jwt.decode(rawToken, JwtOptions(signature = false))
+          auth <- decode[Auth](rawJsonString)
         } {
           auth.roles should contain only (expectedRoles: _*)
+        }
+      }
+
+      it("should create token with company id") {
+        val expectedCompanyId = "expectedCompanyId"
+        val compapny = testCompany.copy(id = Some(expectedCompanyId))
+        val rawToken = tokenService.createToken(testUser.copy(company = Some(compapny)))
+
+        for {
+          rawJsonString <- Jwt.decode(rawToken, JwtOptions(signature = false))
+          auth <- decode[Auth](rawJsonString)
+        } {
+          auth.companyId shouldBe defined
+          auth.companyId.get shouldBe expectedCompanyId
         }
       }
 

@@ -62,8 +62,26 @@ class ThemeRoutesTest extends AsyncFunSpec
 
     it("returns forbidden when userId in the path is different from one in token") {
       val token = tokenService.createToken(testUser)
+      val someOtherUserId = "some-other-user-id"
+      when(userRepository.findById(someOtherUserId))
+        .thenReturn(Future.successful(Some(testUser.copy(id = Some(someOtherUserId)))))
 
-      Get("/users/some-other-user-id/theme") ~> addHeader("Authorization", s"Bearer $token") ~> sealedRoutes ~> check {
+      Get("/users/" + someOtherUserId + "/theme") ~> addHeader("Authorization", s"Bearer $token") ~> sealedRoutes ~> check {
+        status shouldBe StatusCodes.Forbidden
+      }
+    }
+
+    it("returns forbidden when company admin tries to access user of different company") {
+      val currentUserCompany = testCompany.copy(id = Some("company1"))
+      val currentUser = testUser.copy(company = Some(currentUserCompany), roles = Seq(Roles.CompanyAdmin))
+      val token = tokenService.createToken(currentUser)
+
+      val requestedUserId = "some-other-user-id"
+      val requestedUserCompany = testCompany.copy(id = Some("company2"))
+      val requestedUser = testUser.copy(company = Some(requestedUserCompany))
+      when(userRepository.findById(requestedUserId)).thenReturn(Future.successful(Some(requestedUser)))
+
+      Get("/users/" + requestedUserId + "/theme") ~> addHeader("Authorization", s"Bearer $token") ~> sealedRoutes ~> check {
         status shouldBe StatusCodes.Forbidden
       }
     }

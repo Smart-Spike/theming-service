@@ -22,17 +22,17 @@ class ThemeRoutes(authenticate: AuthenticationDirective,
   val routes: Route = {
     pathPrefix("users" / Segment / "theme") { userId =>
       authenticate { auth =>
-        authorize(auth.isPlatformAdmin || auth.isCompanyAdmin || (auth.isUser && userId == auth.userId)) {
-          get {
-            onSuccess(userRepository.findById(userId)) {
-              case None => complete(StatusCodes.NotFound)
-              case Some(user) =>
+        get {
+          onSuccess(userRepository.findById(userId)) {
+            case None => complete(StatusCodes.NotFound)
+            case Some(user) =>
+              authorize(auth.hasAccessToUserResources(user)) {
                 val themeId = user.company match {
                   case Some(company) => company.defaultThemeId
                   case None => Theme.Default
                 }
                 complete(themeRepository.findById(themeId))
-            }
+              }
           }
         }
       }

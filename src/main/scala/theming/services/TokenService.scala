@@ -1,7 +1,6 @@
 package theming.services
 
 import com.typesafe.scalalogging.LazyLogging
-import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
@@ -15,11 +14,9 @@ class TokenService extends LazyLogging {
 
   private val tempKey = "mySuperSecretKey"
 
-  implicit def userTokenEncoder: Encoder[User] =
-    Encoder.forProduct2("userId", "roles")(u => (u.id, u.roles))
-
   def createToken(user: User): String = {
-    val claim = JwtClaim(user.asJson.toString)
+    val auth = Auth(user.id.get, user.roles, user.company.flatMap(_.id))
+    val claim = JwtClaim(auth.asJson.toString)
       .issuedNow
       .expiresIn((10 minutes).toSeconds)
 
